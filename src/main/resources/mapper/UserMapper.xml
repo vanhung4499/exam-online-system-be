@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnv99.exam.mapper.UserMapper">
+    <sql id="simpleFiled">
+        u.id,u.user_name,u.real_name,u.avatar,u.create_time,u.status
+    </sql>
+
+    <!-- Batch insert users -->
+    <insert id="insertBatchUser">
+        insert into t_user
+        values
+        <foreach collection="list" item="user" separator=",">
+            (null,#{user.userName},#{user.realName},#{user.password},
+            null,#{user.id},null,#{user.createTime},1)
+        </foreach>
+    </insert>
+
+    <!-- Batch remove grades -->
+    <update id="removeUserGrade">
+        UPDATE t_user
+        SET grade_id = null
+        WHERE id IN
+        <foreach item="userId" collection="userIds" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </update>
+
+    <!-- Remove grade ID by grade IDs -->
+    <update id="removeGradeIdByGradeIds">
+        update t_user set grade_id = null where grade_id in
+        <foreach collection="gradeIds" item="gradeId" open="(" close=")" separator=",">
+            #{gradeId}
+        </foreach>
+    </update>
+
+    <!-- Delete user by IDs -->
+    <delete id="deleteByUserIds">
+        delete from t_user_book where user_id in
+        <foreach collection="userIds" item="userId" open="(" close=")" separator=",">
+            #{userId}
+        </foreach>
+    </delete>
+
+    <!-- Get user information -->
+    <select id="info" resultType="com.hnv99.exam.model.vo.UserVO">
+        select
+        <include refid="simpleFiled"/>
+        ,r.role_name,g.grade_name
+        from t_user u join t_role r on role_id = r.id left join t_grade g on grade_id = g.id
+        where u.id = #{userId}
+    </select>
+
+    <!-- Get student IDs by class ID -->
+    <select id="selectIdsByClassId" resultType="java.lang.Integer">
+        select id
+        from t_user
+        where role_id = 1
+        and grade_id = #{classId}
+    </select>
+
+    <!-- Paging query for user information -->
+    <select id="pagingUser" resultType="com.hnv99.exam.model.vo.UserVO">
+        select u.id,
+        u.user_name,
+        u.real_name,
+        case u.role_id
+        when 1 then 'Student'
+        when 2 then 'Teacher' end roleName,
+        u.create_time,
+        g.grade_name,
+        g.user_id
+        from t_user as u
+        <if test="roleId == null || roleId == 0">
+            left join t_grade as g on u.grade_id = g.id
+        </if>
+
+        <if test="roleId != null and roleId == 1">
+            join t_grade as g on u.grade_id = g.id and g.user_id = #{userId}
+        </if>
+        <trim prefixOverrides="and" prefix="where">
+            u.is_deleted = 0
+            <if test="gradeId != null and gradeId != 0">
+                u.grade_id = #{gradeId}
+            </if>
+            <if test='realName != null and realName !=""'>
+                and u.real_name like concat('%',#{realName},'%')
+            </if>
+            <if test="roleId != null and roleId == 1">
+                and u.role_id in(1)
+            </if>
+            <if test="roleId == null ">
+                and u.role_id in(1,2)
+            </if>
+        </trim>
+        order by u.create_time desc
+    </select>
+
+    <!-- Get students for exam page -->
+    <select id="stuExamPage">
+        SELECT * FROM t_user WHERE id in (SELECT grade_id FROM t_exam_grade WHERE exam_id= #{exam_id})
+    </select>
+
+    <!-- Count the number of students per grade -->
+    <select id="countAndGroupByGradeAndRoleId" resultType="com.hnv99.exam.model.form.count.ClassCountResult">
+        SELECT g.id AS gradeId, g.name AS gradeName, COUNT(u.id) AS count
+        FROM user u
+        INNER JOIN grade g ON u.grade_id = g.id
+        WHERE u.role_id = #{roleId}
+        GROUP BY g.id
+    </select>
+</mapper>

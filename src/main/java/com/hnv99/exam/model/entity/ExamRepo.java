@@ -1,0 +1,60 @@
+package com.hnv99.exam.model.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+import java.io.Serializable;
+
+@TableName("t_exam_repo")
+public class ExamRepo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * id Exam and Repository
+     */
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
+
+    /**
+     * Exam id Unique
+     */
+    private Integer examId;
+
+    /**
+     * Repository id Unique
+     */
+    private Integer repoId;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+    public Integer getExamId() {
+        return examId;
+    }
+
+    public void setExamId(Integer examId) {
+        this.examId = examId;
+    }
+    public Integer getRepoId() {
+        return repoId;
+    }
+
+    public void setRepoId(Integer repoId) {
+        this.repoId = repoId;
+    }
+
+    @Override
+    public String toString() {
+        return "ExamRepo{" +
+                "id=" + id +
+                ", examId=" + examId +
+                ", repoId=" + repoId +
+                "}";
+    }
+}

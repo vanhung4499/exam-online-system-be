@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hnv99.exam.mapper.StatMapper">
+
+    <!-- Student count by grade -->
+    <select id="StudentGradeCount" resultType="com.hnv99.exam.model.vo.stat.GradeStudentVO">
+        SELECT g.id, g.grade_name, count(s.id) AS totalStudent
+        FROM t_grade g
+        LEFT JOIN t_user s ON g.id = s.grade_id
+        <where>
+            <if test="roleId == 2">
+                g.user_id=#{id}
+            </if>
+        </where>
+        GROUP BY g.id
+    </select>
+
+    <!-- Exam count by grade -->
+    <select id="ExamGradeCount" resultType="com.hnv99.exam.model.vo.stat.GradeExamVO">
+        select eg.grade_id as id, g.grade_name, count(*) as total
+        from t_exam_grade as eg
+        right join t_grade as g on eg.grade_id = g.id
+        <trim prefix="where"  >
+            <if test="roleId = 2">
+                g.user_id = #{id}
+            </if>
+        </trim>
+        group by eg.grade_id
+    </select>
+
+</mapper>
