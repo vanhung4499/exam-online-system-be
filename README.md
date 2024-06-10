@@ -77,7 +77,8 @@ Main features include:
   - [ ] Implement push notification through Firebase Cloud Messaging
 
 - Upload:
-- 
+    - [ ] Implement file upload for question, exam, and user image profile
+    - [ ] Implement media server to store file (AWS S3, Cloudinary, AliOSS, etc.)
 
 ## Running the application
 
